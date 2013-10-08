@@ -1,0 +1,69 @@
+UnBundle 'mattn/webapi-vim'
+UnBundle 'mattn/gist-vim'
+UnBundle 'spf13/PIV'
+UnBundle 'arnaud-lb/vim-php-namespace'
+UnBundle 'elzr/vim-json'
+UnBundle 'groenewege/vim-less'
+UnBundle 'pangloss/vim-javascript'
+UnBundle 'briancollins/vim-jst'
+UnBundle 'kchmck/vim-coffee-script'
+UnBundle 'derekwyatt/vim-scala'
+UnBundle 'derekwyatt/vim-sbt'
+UnBundle 'travitch/hasksyn'
+UnBundle 'dag/vim2hs'
+UnBundle 'Twinside/vim-haskellConceal'
+UnBundle 'lukerandall/haskellmode-vim'
+UnBundle 'ujihisa/neco-ghc'
+UnBundle 'eagletmt/ghcmod-vim'
+UnBundle 'Shougo/vimproc'
+UnBundle 'adinapoli/cumino'
+UnBundle 'bitc/vim-hdevtools'
+UnBundle 'amirh/HTML-AutoCloseTag'
+UnBundle 'hail2u/vim-css3-syntax'
+UnBundle 'tpope/vim-haml'
+UnBundle 'tpope/vim-rails'
+UnBundle 'tpope/vim-cucumber'
+UnBundle 'quentindecock/vim-cucumber-align-pipes'
+UnBundle 'Puppet-Syntax-Highlighting'
+UnBundle 'beyondwords/vim-twig'
+
+" Mode Indication -Prominent!
+function! InsertStatuslineColor(mode)
+  if a:mode == 'i'
+    hi statusline guibg=red
+    set cursorcolumn
+  elseif a:mode == 'r'
+    hi statusline guibg=blue
+  else
+    hi statusline guibg=magenta
+  endif
+endfunction
+
+function! InsertLeaveActions()
+  hi statusline guibg=green
+  set nocursorcolumn
+endfunction
+
+"au InsertEnter * call InsertStatuslineColor(v:insertmode)
+"au InsertLeave * call InsertLeaveActions()
+
+hi CursorLine guifg=NONE guibg=#e7e7e7
+au InsertEnter * set cursorline
+au InsertLeave * set nocursorline
+
+autocmd InsertEnter * :set number
+autocmd InsertLeave * :set relativenumber
+
+Bundle 'oblitum/rainbow'
+au FileType c,cpp,objc,objcpp call rainbow#load()
+
+" folding
+syntax enable
+set foldmethod=syntax
+set foldenable
+set foldlevel=100
+
+let g:rainbow_operators=2
+syn match comment "\v(^\s*//.*\n)+" fold
+
+let &colorcolumn=join(range(81,999),",")

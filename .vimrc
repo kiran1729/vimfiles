@@ -39,12 +39,18 @@ endif
 if has('statusline')
     set laststatus=2
     " Broken down into easily includeable segments
-    set statusline=%<%f\                     " Filename
+    set statusline=%{getcwd()}:              " Current dir
+    set statusline+=[%t]\                      " Filename
     set statusline+=%w%h%m%r                 " Options
-    set statusline+=\ [%{&ff}/%Y]            " Filetype
-    set statusline+=\ [%{getcwd()}]          " Current dir
-    set statusline+=%=%-14.(%l,%c%V%)\ %p%%  " Right aligned file nav info
+    "set statusline+=\ [%{&ff}/%Y]           " Filetype
+    set statusline+=%=%-14.(%l\ of\ %L,%c%V%)\ %p%%  " Right aligned file nav info
+    " Show tab number and filename in tab title
+    set guitablabel=\[%N\]\ %t\ %M
 endif
+
+" highlight the current line in insert mode
+au InsertEnter * set cursorline
+au InsertLeave * set nocursorline
 
 syntax on
 set autoindent
@@ -88,27 +94,9 @@ set whichwrap=b,s,h,l,<,>,[,]   " Backspace and cursor keys wrap too
 
 " Remove trailing whitespaces and ^M chars
 autocmd FileType go,javascript,python autocmd BufWritePre <buffer> call StripTrailingWhitespace()
-autocmd FileType go autocmd BufWritePre <buffer> Fmt
+"autocmd FileType go autocmd BufWritePre <buffer> GoFmt
 let g:go_fmt_options = '-tabs=false -tabwidth=2'
 
-    " Strip whitespace {
-    function! StripTrailingWhitespace()
-        " To disable the stripping of whitespace, add the following to your
-        " .vimrc.before.local file:
-        "   let g:spf13_keep_trailing_whitespace = 1
-        if !exists('g:spf13_keep_trailing_whitespace')
-            " Preparation: save last search, and cursor position.
-            let _s=@/
-            let l = line(".")
-            let c = col(".")
-            " do the business:
-            %s/\s\+$//e
-            " clean up: restore previous search history, and cursor position
-            let @/=_s
-            call cursor(l, c)
-        endif
-    endfunction
-    " }
 
 " tab navigation using Ctrl-Left/Right
 nnoremap <C-left>  :tabprevious<CR>
@@ -134,6 +122,8 @@ nmap <leader>f8 :set foldlevel=8<CR>
 nmap <leader>f9 :set foldlevel=9<CR>
 " toggle search highlighting rather than clear the current
 nmap <silent> <leader>/ :set invhlsearch<CR>
+" quick jumping to next and previous errors
+nmap <leader>n :lnext<CR>
 " Find merge conflict markers
 map <leader>fc /\v^[<\|=>]{7}( .*\|$)<CR>
 " Shortcuts
@@ -248,6 +238,10 @@ map zh zH
         endif
     "}
 
+    " syntastic {
+        let g:syntastic_always_populate_loc_list = 1
+    "}
+
     " neocomplete {
       let g:acp_enableAtStartup = 0
       let g:neocomplete#enable_at_startup = 1
@@ -294,8 +288,8 @@ map zh zH
 
           " <CR>: close popup
           " <s-CR>: close popup and save indent.
-          inoremap <expr><s-CR> pumvisible() ? neocomplete#close_popup()"\<CR>" : "\<CR>"
-          inoremap <expr><CR> pumvisible() ? neocomplete#close_popup() : "\<CR>"
+          inoremap <expr><s-CR> pumvisible() ? neocomplete#close_popup() : "\<CR>"
+          inoremap <expr><CR> pumvisible() ? neocomplete#close_popup()."\<CR>" : "\<CR>"
 
           " <C-h>, <BS>: close popup and delete backword char.
           inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
@@ -344,3 +338,70 @@ map zh zH
       " especially when splits are used.
       set completeopt-=preview
     " }
+
+" Functions {
+
+    " Initialize directories {
+    function! InitializeDirectories()
+        let parent = $HOME
+        let prefix = 'vim'
+        let dir_list = {
+                    \ 'backup': 'backupdir',
+                    \ 'views': 'viewdir',
+                    \ 'swap': 'directory' }
+
+        if has('persistent_undo')
+            let dir_list['undo'] = 'undodir'
+        endif
+
+        let common_dir = $HOME . '/.vim/' . prefix
+
+        for [dirname, settingname] in items(dir_list)
+            let directory = common_dir . dirname . '/'
+            if exists("*mkdir")
+                if !isdirectory(directory)
+                    call mkdir(directory)
+                endif
+            endif
+            if !isdirectory(directory)
+                echo "Warning: Unable to create backup directory: " . directory
+                echo "Try: mkdir -p " . directory
+            else
+                let directory = substitute(directory, " ", "\\\\ ", "g")
+                exec "set " . settingname . "=" . directory
+            endif
+        endfor
+    endfunction
+    call InitializeDirectories()
+    " }
+
+    " Initialize NERDTree as needed {
+    function! NERDTreeInitAsNeeded()
+        redir => bufoutput
+        buffers!
+        redir END
+        let idx = stridx(bufoutput, "NERD_tree")
+        if idx > -1
+            NERDTreeMirror
+            NERDTreeFind
+            wincmd l
+        endif
+    endfunction
+    " }
+
+    " Strip whitespace {
+    function! StripTrailingWhitespace()
+        if !exists('g:_keep_trailing_whitespace')
+            " Preparation: save last search, and cursor position.
+            let _s=@/
+            let l = line(".")
+            let c = col(".")
+            " do the business:
+            %s/\s\+$//e
+            " clean up: restore previous search history, and cursor position
+            let @/=_s
+            call cursor(l, c)
+        endif
+    endfunction
+    " }
+"}

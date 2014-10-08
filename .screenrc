@@ -1,0 +1,22 @@
+shell bash                      # Tell screen your default shell
+startup_message off             # Turn off start message
+defscrollback = 5000
+shelltitle '] |bash'    # Dynamic window titled for running program
+
+# Change the default C-a to C-\
+escape ^\\
+
+#hardstatus alwayslastline '%{= .} %{R}%-Lw%{= .}%> %n%f %t*%{= .}%+Lw%< %-=%{g}(%{d}%H/%l%{g})'
+hardstatus alwayslastline "%{bw}[ %?%-Lw%?%{wb} %n*%f %t %{bw}%?%+Lw%? ]%=%{bw}[%C %A] [%l]"
+
+termcapinfo xterm 'hs:ts=\E]2;:fs=\007:ds=\E]2;screen\007'
+termcapinfo xterm* ti@:te@
+termcapinfo screen 'hs:ts=\E]2;:fs=\007:ds=\E]2;screen\007'
+term xterm
+
+# Use Ctrl-Left and Ctrl-Right for moving between screens
+# Arrow keys to switch terminals (only works with X) 
+# Alt + left
+bindkey ^[[1;5D prev
+# Alt + right
+bindkey ^[[1;5C next

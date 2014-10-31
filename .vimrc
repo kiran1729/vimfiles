@@ -10,6 +10,7 @@ Bundle 'majutsushi/tagbar'
 Bundle 'Shougo/neocomplete.vim'
 Bundle 'fatih/vim-go'
 Bundle 'kien/ctrlp.vim'
+Bundle 'rking/ag.vim'
 
 filetype plugin indent on
 filetype on
@@ -104,6 +105,8 @@ nnoremap <C-right> :tabnext<CR>
 nnoremap <C-t>     :tabnew<CR>
 
 let mapleader = ','
+" fast tabnew
+nmap <leader>. :tabnew 
 " Wrapped lines goes down/up to next row, rather than next line in file.
 noremap j gj
 noremap k gk
@@ -212,6 +215,8 @@ map zh zH
         let g:ctrlp_map = '<c-p>'
         let g:ctrlp_cmd = 'CtrlP'
         let g:ctrlp_working_path_mode = 'ra'
+        " open result in new tab
+        let g:ctrlp_prompt_mappings = {'AcceptSelection("t")': ['<cr>'], 'AcceptSelection("e")': ['<c-x>']}
         nnoremap <silent> <D-t> :CtrlP<CR>
         nnoremap <silent> <D-r> :CtrlPMRU<CR>
         let g:ctrlp_custom_ignore = {
@@ -236,8 +241,27 @@ map zh zH
                 \ 'fallback': 'find %s -type f'
             \ }
         endif
+
+        if executable('ag')
+          " Use ag over grep
+          set grepprg=ag\ --nogroup\ --nocolor
+
+          " remove previous setting of var
+          unlet g:ctrlp_user_command
+          " Use ag in CtrlP for listing files. Lightning fast and
+          " respects .gitignore
+          let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
+
+          " ag is fast enough that CtrlP doesn't need to cache
+          let g:ctrlp_use_caching = 0
+        endif
     "}
 
+    " Ag {
+        " bind leader,k to grep word under cursor
+        nnoremap <leader>k :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+    "}
+    "
     " syntastic {
         let g:syntastic_always_populate_loc_list = 1
     "}
